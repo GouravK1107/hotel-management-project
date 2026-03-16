@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="login-container">
+    <div class="card">
+        <div class="card-header text-white text-center">
+            <h4>Administrator Login</h4>
+            <div class="header-shine"></div>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('login') }}">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control", placeholder="Enter username") }}
+                    {% if form.username.errors %}
+                        <div class="text-danger">{{ form.username.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control", placeholder="Enter password") }}
+                    {% if form.password.errors %}
+                        <div class="text-danger">{{ form.password.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn-login">Login to Dashboard</button>
+            </form>
+        </div>
+        <div class="card-footer text-muted text-center">
+            Default: admin / admin
+        </div>
+    </div>
+</div>
+
+<style>
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    position: relative;
+    overflow: hidden;
+    padding: 1.2rem 1rem;
+    background: linear-gradient(135deg, #0A2342, #1E3A5F);
+    border-bottom: none;
+}
+
+.card-header h4 {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    color: white;
+}
+
+/* Improved Header Animation */
+.header-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.4),
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transform: skewX(-15deg);
+    animation: headerShine 3s ease-in-out infinite;
+}
+
+@keyframes headerShine {
+    0% {
+        left: -100%;
+    }
+    20% {
+        left: 100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #0A2342;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #C6A43F;
+    box-shadow: 0 0 0 0.2rem rgba(198, 164, 63, 0.25);
+    outline: none;
+}
+
+/* Matching Login Button */
+.btn-login {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #0A2342, #1E3A5F);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(10, 35, 66, 0.2);
+}
+
+/* Button hover state - exactly matching the header animation */
+.btn-login:hover {
+    background: linear-gradient(135deg, #1E3A5F, #0A2342);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(10, 35, 66, 0.3);
+}
+
+/* Button shine effect on hover */
+.btn-login::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.4),
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transform: skewX(-15deg);
+    transition: left 0.5s ease;
+}
+
+.btn-login:hover::before {
+    left: 150%;
+}
+
+/* Active state */
+.btn-login:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(10, 35, 66, 0.2);
+}
+
+.card-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.text-danger {
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+    color: #dc3545;
+}
+
+/* Mobile Responsive */
+@media (max-width: 576px) {
+    .login-container {
+        max-width: 90%;
+        margin: 50px auto;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .card-header h4 {
+        font-size: 1.2rem;
+    }
+}
+</style>
+{% endblock %}

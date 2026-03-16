@@ -1,0 +1,53 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+env/
+venv/
+ENV/
+.venv/
+
+# Flask instance folder (usually contains secrets or DB)
+instance/
+
+# Environment variables
+.env
+.env.*
+
+# Python distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs
+*.log
+
+# SQLite databases
+*.db
+*.sqlite3
+
+# VS Code
+.vscode/
+
+# Mac system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+
+# Pytest
+.pytest_cache/
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Migrations (optional if using Alembic/Flask-Migrate)
+migrations/__pycache__/
+
+# Temporary files
+*.swp
+*.swo

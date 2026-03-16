@@ -1,0 +1,645 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+    <h2 class="mb-4">Dashboard</h2>
+</div>
+
+<!-- Statistics Cards - Side by Side in a Single Row -->
+<div class="stats-row">
+    <div class="stat-card-wrapper">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fas fa-hotel"></i>
+                </div>
+                <div class="stat-content">
+                    <h5 class="stat-title">Total Rooms</h5>
+                    <p class="stat-value">{{ total_rooms }}</p>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-label">All rooms</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card-wrapper">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fas fa-door-open"></i>
+                </div>
+                <div class="stat-content">
+                    <h5 class="stat-title">Available</h5>
+                    <p class="stat-value">{{ available_rooms }}</p>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-label text-success">Ready to book</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card-wrapper">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h5 class="stat-title">Total Guests</h5>
+                    <p class="stat-value">{{ total_guests }}</p>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-label">Registered</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card-wrapper">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h5 class="stat-title">Active</h5>
+                    <p class="stat-value">{{ active_bookings }}</p>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-label text-warning">Current stays</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Bookings Section -->
+<div class="recent-bookings mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="section-title">Recent Bookings</h3>
+        <a href="{{ url_for('bookings') }}" class="btn btn-outline-gold btn-sm">
+            View All <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <!-- Mobile swipe hint -->
+    <div class="d-block d-md-none text-center mb-2 small text-gold">
+        <i class="fas fa-arrows-alt-h"></i> Swipe to see all bookings
+    </div>
+
+    <div class="table-container">
+        <div class="table-responsive-hint">← Swipe to see full table →</div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Guest</th>
+                    <th>Room</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in recent_bookings %}
+                <tr>
+                    <td><span class="badge bg-navy-gradient">#{{ booking.id }}</span></td>
+                    <td class="fw-bold">{{ booking.guest.first_name }} {{ booking.guest.last_name }}</td>
+                    <td><span class="room-badge">{{ booking.room.room_number }}</span></td>
+                    <td><i class="fas fa-calendar-alt text-gold me-1"></i>{{ booking.check_in_date.strftime('%d-%m-%Y') }}</td>
+                    <td><i class="fas fa-calendar-alt text-gold me-1"></i>{{ booking.check_out_date.strftime('%d-%m-%Y') }}</td>
+                    <td>
+                        <span class="badge status-{{ booking.status }}">
+                            {{ booking.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('booking_detail', id=booking.id) }}" class="btn-eye" title="View Details">
+                            <i class="fas fa-eye-slash"></i>
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-2x text-gold mb-2"></i>
+                        <p class="mb-0">No recent bookings found.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+/* Dashboard specific styles */
+.dashboard-header h2 {
+    margin-bottom: 1rem !important;
+}
+
+/* Stats Row - Flexbox for side by side layout */
+.stats-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.stat-card-wrapper {
+    flex: 1;
+    min-width: 180px;
+    max-width: 250px;
+}
+
+/* Stat Cards */
+.stat-card {
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--white), var(--cream));
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    opacity: 0.7;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(198, 164, 63, 0.15);
+}
+
+.stat-card .card-body {
+    padding: 1.2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.stat-icon {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    font-size: 2rem;
+    color: var(--gold);
+    opacity: 0.15;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+    opacity: 0.25;
+    transform: scale(1.1);
+}
+
+.stat-content {
+    margin-bottom: 0.5rem;
+}
+
+.stat-title {
+    font-size: 0.7rem;
+    color: var(--gray-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.2rem;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--navy);
+    font-family: 'Playfair Display', serif;
+    line-height: 1.2;
+    margin-bottom: 0;
+}
+
+.stat-footer {
+    margin-top: auto;
+    font-size: 0.7rem;
+    color: var(--gray-dark);
+    border-top: 1px dashed rgba(198, 164, 63, 0.2);
+    padding-top: 0.4rem;
+}
+
+.stat-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.stat-label.text-success {
+    color: var(--success) !important;
+}
+
+.stat-label.text-warning {
+    color: var(--warning) !important;
+}
+
+/* Section Title */
+.section-title {
+    font-size: 1.3rem;
+    margin-bottom: 0;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 2px;
+}
+
+/* Room Badge */
+.room-badge {
+    background: rgba(198, 164, 63, 0.1);
+    color: var(--navy);
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(198, 164, 63, 0.3);
+    white-space: nowrap;
+}
+
+/* Status Badges */
+.status-confirmed {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-checked-in {
+    background: linear-gradient(135deg, var(--success), var(--success-light));
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-checked-out {
+    background: linear-gradient(135deg, var(--gray-dark), #6c757d);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-cancelled {
+    background: linear-gradient(135deg, var(--danger), var(--danger-light));
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* ===== EYE ICON - CLOSED TO OPEN ON HOVER ===== */
+.btn-eye {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 4px 10px rgba(10, 35, 66, 0.3);
+}
+
+.btn-eye i {
+    position: absolute;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+/* Closed eye (default) */
+.btn-eye .fa-eye-slash {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.btn-eye .fa-eye {
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+/* Open eye on hover */
+.btn-eye:hover {
+    transform: scale(1.1) rotate(3deg);
+    background: linear-gradient(135deg, var(--info), var(--navy-light));
+    box-shadow: 0 8px 20px rgba(44, 95, 138, 0.5);
+}
+
+.btn-eye:hover .fa-eye-slash {
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+.btn-eye:hover .fa-eye {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Glow effect */
+.btn-eye::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+    z-index: 1;
+}
+
+.btn-eye:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+/* Pulse animation on hover */
+.btn-eye::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-eye:hover::after {
+    opacity: 1;
+    animation: pulse-ring 1.5s infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.2;
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0.5;
+    }
+}
+
+/* Tooltip */
+.btn-eye[title] {
+    position: relative;
+}
+
+.btn-eye[title]:hover::before {
+    content: attr(title);
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border: 1px solid var(--gold);
+    z-index: 1000;
+    animation: tooltipFade 0.2s ease;
+}
+
+@keyframes tooltipFade {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Recent Bookings Table */
+.recent-bookings .table-container {
+    border-radius: 16px;
+    background: var(--white);
+    padding: 0.5rem;
+}
+
+.recent-bookings .table {
+    min-width: 700px;
+}
+
+.recent-bookings .table th {
+    font-size: 0.7rem;
+    padding: 0.8rem 0.5rem;
+}
+
+.recent-bookings .table td {
+    padding: 0.8rem 0.5rem;
+    font-size: 0.85rem;
+    vertical-align: middle;
+}
+
+/* Mobile Responsive */
+@media (max-width: 992px) {
+    .stats-row {
+        gap: 0.8rem;
+    }
+    
+    .stat-card-wrapper {
+        min-width: 160px;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-row {
+        gap: 0.5rem;
+    }
+    
+    .stat-card-wrapper {
+        min-width: 140px;
+    }
+    
+    .stat-value {
+        font-size: 1.3rem;
+    }
+    
+    .stat-icon {
+        font-size: 1.5rem;
+    }
+    
+    .stat-title {
+        font-size: 0.65rem;
+    }
+    
+    .stat-footer {
+        font-size: 0.6rem;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+    }
+    
+    .btn-eye {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .btn-eye i {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-row {
+        gap: 0.5rem;
+        padding-bottom: 0.8rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    .stats-row::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .stats-row::-webkit-scrollbar-track {
+        background: var(--cream);
+        border-radius: 4px;
+    }
+    
+    .stats-row::-webkit-scrollbar-thumb {
+        background: var(--gold);
+        border-radius: 4px;
+    }
+    
+    .stat-card-wrapper {
+        min-width: 130px;
+    }
+    
+    .stat-card .card-body {
+        padding: 1rem 0.8rem;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .stat-icon {
+        font-size: 1.3rem;
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+    
+    .stat-title {
+        font-size: 0.6rem;
+    }
+    
+    .btn-eye {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .btn-eye i {
+        font-size: 0.8rem;
+    }
+}
+
+/* Navy Gradient Badge */
+.bg-navy-gradient {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* Text Gold */
+.text-gold {
+    color: var(--gold) !important;
+}
+
+/* Hover effect for view all button */
+.btn-outline-gold {
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+    padding: 0.3rem 1rem;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-gold:hover {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+    border-color: transparent;
+    transform: translateY(-2px);
+}
+
+.btn-outline-gold i {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-outline-gold:hover i {
+    transform: translateX(3px);
+}
+</style>
+{% endblock %}

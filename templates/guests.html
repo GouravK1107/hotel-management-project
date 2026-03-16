@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+{% block title %}Guests{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="header-content">
+        <h2><i class="fas fa-users"></i> Guest Management</h2>
+        <p class="header-subtitle">View and manage all hotel guests</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('add_guest') }}" class="btn-primary">
+            <i class="fas fa-user-plus"></i>
+            <span>Add Guest</span>
+        </a>
+        <a href="{{ url_for('quick_booking') }}" class="btn-success">
+            <i class="fas fa-bolt"></i>
+            <span>Quick Booking</span>
+        </a>
+    </div>
+</div>
+
+<!-- Mobile swipe indicator -->
+<div class="mobile-swipe-indicator">
+    <i class="fas fa-chevron-left"></i>
+    <span>Swipe to see all columns</span>
+    <i class="fas fa-chevron-right"></i>
+</div>
+
+<div class="table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>ID Proof</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for guest in guests %}
+            <tr>
+                <td><span class="id-badge">#{{ guest.id }}</span></td>
+                <td class="guest-cell">
+                    <div class="guest-info">
+                        <span class="guest-name">{{ guest.first_name }} {{ guest.last_name }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="contact-cell">
+                        <i class="fas fa-envelope text-gold"></i>
+                        <span>{{ guest.email }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="contact-cell">
+                        <i class="fas fa-phone text-gold"></i>
+                        <span>{{ guest.phone }}</span>
+                    </div>
+                </td>
+                <td>
+                    {% if guest.proof_type and guest.id_proof %}
+                        <div class="proof-display">
+                            <span class="proof-type">{{ guest.proof_type }}</span>
+                            <span class="proof-number">{{ guest.id_proof }}</span>
+                        </div>
+                    {% else %}
+                        <span class="na-badge">Not Provided</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-group">
+                        <a href="{{ url_for('edit_guest', id=guest.id) }}" class="action-btn edit-btn" title="Edit Guest">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{{ url_for('delete_guest', id=guest.id) }}" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this guest?')" title="Delete Guest">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <p>No guests found</p>
+                    <a href="{{ url_for('add_guest') }}" class="btn-primary btn-sm">Add Your First Guest</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+/* ===== PAGE HEADER ===== */
+.page-header {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    border-radius: 15px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.header-content h2 {
+    color: white;
+    margin: 0 0 0.3rem 0;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header-content h2 i {
+    color: var(--gold);
+}
+
+.header-subtitle {
+    color: rgba(255,255,255,0.8);
+    margin: 0;
+    font-size: 0.95rem;
+    padding: 10px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.header-actions .btn-primary {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy);
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(198, 164, 63, 0.3);
+}
+
+.header-actions .btn-success {
+    background: linear-gradient(135deg, #0B5E42, #1E8F6B);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(11, 94, 66, 0.3);
+}
+
+.header-actions .btn-primary:hover,
+.header-actions .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+/* ===== MOBILE SWIPE INDICATOR ===== */
+.mobile-swipe-indicator {
+    display: none;
+    text-align: center;
+    padding: 0.8rem;
+    background: rgba(198, 164, 63, 0.05);
+    border-radius: 50px;
+    margin-bottom: 1rem;
+    color: var(--gold);
+    font-size: 0.9rem;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(198, 164, 63, 0.2);
+}
+
+.mobile-swipe-indicator i {
+    animation: bounce 1s infinite;
+}
+
+.mobile-swipe-indicator i:first-child {
+    animation-delay: 0.2s;
+}
+
+.mobile-swipe-indicator i:last-child {
+    animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+}
+
+/* ===== TABLE WRAPPER ===== */
+.table-wrapper {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Custom scrollbar for table wrapper */
+.table-wrapper::-webkit-scrollbar {
+    height: 8px;
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+}
+
+/* ===== DATA TABLE ===== */
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 900px; /* Ensures table doesn't squish on desktop */
+}
+
+.data-table thead th {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.2rem;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.data-table thead th:first-child {
+    border-top-left-radius: 15px;
+}
+
+.data-table thead th:last-child {
+    border-top-right-radius: 15px;
+}
+
+.data-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.data-table tbody tr:hover {
+    background: rgba(198, 164, 63, 0.03);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.data-table tbody td {
+    padding: 1.2rem 1.2rem;
+    color: var(--navy);
+    font-size: 0.95rem;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+}
+
+/* ===== TABLE CELL STYLES ===== */
+.id-badge {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.guest-cell .guest-name {
+    font-weight: 600;
+    color: var(--navy);
+}
+
+.contact-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contact-cell i {
+    width: 16px;
+    font-size: 0.9rem;
+}
+
+.proof-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+}
+
+.proof-type {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: white;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.proof-number {
+    background: rgba(198, 164, 63, 0.1);
+    color: var(--navy);
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    border: 1px solid rgba(198, 164, 63, 0.3);
+}
+
+.na-badge {
+    background: #f1f3f5;
+    color: #6c757d;
+    padding: 0.25rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-style: italic;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-group {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: white;
+    color: var(--navy);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.edit-btn:hover {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    padding: 3rem !important;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--gold);
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-sm {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+    text-decoration: none;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:768px){
+
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+        padding:1.2rem;
+    }
+
+    .header-content{
+        width:100%;
+    }
+
+    .header-content h2{
+        font-size:1.4rem;
+    }
+
+    .header-subtitle{
+        padding:10px;
+    }
+
+    /* FIX BUTTON LAYOUT */
+    .header-actions{
+        width:100%;
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+    }
+
+    /* FIX BUTTON SIZE */
+    .header-actions .btn-primary,
+    .header-actions .btn-success{
+        flex:1;
+        min-height:44px;
+        padding:10px 16px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        white-space:nowrap;
+    }
+    
+    .mobile-swipe-indicator {
+        display: flex;
+    }
+    
+    .data-table tbody td {
+        padding: 1rem 0.8rem;
+        font-size: 0.85rem;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .action-btn i {
+        font-size: 0.8rem;
+    }
+    
+    .proof-display {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-header {
+        padding: 1rem;
+    }
+    
+    .header-content h2 {
+        font-size: 1.2rem;
+    }
+    
+    .data-table tbody td {
+        padding: 0.8rem 0.5rem;
+    }
+    
+    .id-badge {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+    }
+    
+    .contact-cell i {
+        display: none;
+    }
+    
+    .contact-cell span {
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}

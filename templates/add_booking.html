@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}New Booking{% endblock %}
+{% block content %}
+<h2 class="mb-4">Create New Booking</h2>
+<div class="row">
+    <div class="col-md-8">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.guest_id.label(class="form-label") }}
+                    {{ form.guest_id(class="form-select") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.room_id.label(class="form-label") }}
+                    {{ form.room_id(class="form-select") }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.check_in_date.label(class="form-label") }}
+                    {{ form.check_in_date(class="form-control", type="date") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.check_out_date.label(class="form-label") }}
+                    {{ form.check_out_date(class="form-control", type="date") }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.paid_amount.label(class="form-label") }}
+                    {{ form.paid_amount(class="form-control", placeholder="Enter advance payment") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Status</label>
+                    <input type="text" class="form-control" value="Confirmed (auto)" readonly>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Booking</button>
+            <a href="{{ url_for('bookings') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

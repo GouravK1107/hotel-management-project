@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Invoice #{{ invoice.id }}{% endblock %}
+{% block extra_css %}
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        .print-only {
+            display: block !important;
+        }
+        body {
+            background-color: white;
+        }
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd;
+        }
+    }
+    .print-only {
+        display: none;
+    }
+    .invoice-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px 10px 0 0;
+    }
+    .invoice-details {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    .table-invoice th {
+        background-color: #343a40;
+        color: white;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="invoice-header text-center">
+                <h2 class="mb-0">🏨 Hotel Management System</h2>
+                <p class="mb-0">Luxury Stay, Memorable Experience</p>
+            </div>
+            
+            <div class="card-body">
+                <!-- Print Header (Only visible when printing) -->
+                <div class="print-only text-center mb-4">
+                    <h1>HOTEL MANAGEMENT SYSTEM</h1>
+                    <p>123 Luxury Street, New York, NY 10001</p>
+                    <p>Tel: +1 234 567 890 | Email: info@hotel.com</p>
+                    <hr>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <h5>Invoice To:</h5>
+                        <p>
+                            <strong>{{ invoice.booking.guest.first_name }} {{ invoice.booking.guest.last_name }}</strong><br>
+                            {{ invoice.booking.guest.email }}<br>
+                            {{ invoice.booking.guest.phone }}<br>
+                            {{ invoice.booking.guest.address or '' }}
+                        </p>
+                    </div>
+                    <div class="col-6 text-end">
+                        <h5>Invoice Details:</h5>
+                        <p>
+                            <strong>Invoice No:</strong> #{{ invoice.id }}<br>
+                            <strong>Date:</strong> {{ invoice.invoice_date.strftime('%d-%m-%Y') }}<br>
+                            <strong>Booking ID:</strong> #{{ invoice.booking.id }}<br>
+                            <strong>Status:</strong> 
+                            {% if invoice.paid %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-warning">Unpaid</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="invoice-details mb-4">
+                    <h5>Booking Summary</h5>
+                    <table class="table table-bordered table-invoice">
+                        <thead>
+                            <tr>
+                                <th>Room</th>
+                                <th>Type</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                                <th>Nights</th>
+                                <th>Price/Night</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ invoice.booking.room.room_number }}</td>
+                                <td>{{ invoice.booking.room.room_type }}</td>
+                                <td>{{ invoice.booking.check_in_date.strftime('%d-%m-%Y') }}</td>
+                                <td>{{ invoice.booking.check_out_date.strftime('%d-%m-%Y') }}</td>
+                                <td>{{ invoice.booking.nights() }}</td>
+                                <td>${{ invoice.booking.room.price }}</td>
+                                <td>${{ invoice.booking.total_amount }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="6" class="text-end">Subtotal:</th>
+                                <th>${{ invoice.booking.total_amount }}</th>
+                            </tr>
+                            <tr>
+                                <th colspan="6" class="text-end">Paid Amount:</th>
+                                <th>${{ invoice.booking.paid_amount }}</th>
+                            </tr>
+                            <tr>
+                                <th colspan="6" class="text-end">Balance Due:</th>
+                                <th>${{ invoice.booking.balance() }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Payment Terms:</h6>
+                        <p class="text-muted small">Full payment is required at check-in. This invoice serves as a receipt of payment.</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <h6>Authorized Signature:</h6>
+                        <p class="text-muted small">_________________________</p>
+                        <p class="text-muted small">Hotel Manager</p>
+                    </div>
+                </div>
+                
+                <div class="text-muted small text-center mt-4">
+                    <p>This is a computer generated invoice. No signature is required.</p>
+                    <p>Thank you for choosing our hotel!</p>
+                </div>
+            </div>
+            
+            <div class="card-footer text-center no-print">
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="fas fa-print"></i> Print Invoice
+                </button>
+                <a href="{{ url_for('booking_detail', id=invoice.booking.id) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Booking
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

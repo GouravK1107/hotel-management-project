@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Check Out Booking #{{ booking.id }}{% endblock %}
+{% block content %}
+<h2>Check Out</h2>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Booking Summary</h5>
+                <p><strong>Guest:</strong> {{ booking.guest.first_name }} {{ booking.guest.last_name }}</p>
+                <p><strong>Room:</strong> {{ booking.room.room_number }} ({{ booking.room.room_type }})</p>
+                <p><strong>Check-in:</strong> {{ booking.check_in_date }}</p>
+                <p><strong>Check-out:</strong> {{ booking.check_out_date }}</p>
+                <p><strong>Nights:</strong> {{ booking.nights() }}</p>
+                <p><strong>Total Amount:</strong> ${{ booking.total_amount }}</p>
+                <p><strong>Already Paid:</strong> ${{ booking.paid_amount }}</p>
+                <p><strong>Balance Due:</strong> ${{ booking.balance() }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.final_payment.label(class="form-label") }}
+                {{ form.final_payment(class="form-control", value=booking.balance()) }}
+                {% if form.final_payment.errors %}<div class="text-danger">{{ form.final_payment.errors[0] }}</div>{% endif %}
+                <small class="text-muted">Enter amount to pay now (can be partial).</small>
+            </div>
+            <button type="submit" class="btn btn-warning">Complete Check Out</button>
+            <a href="{{ url_for('booking_detail', id=booking.id) }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

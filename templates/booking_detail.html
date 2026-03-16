@@ -1,0 +1,1098 @@
+{% extends "base.html" %}
+{% block title %}Booking #{{ booking.id }}{% endblock %}
+
+{% block content %}
+<div class="booking-detail-container">
+    <!-- Header Section -->
+    <div class="detail-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="booking-badge">
+                    <span class="badge-gold">Booking ID: #{{ booking.id }}</span>
+                </div>
+                <h1 class="booking-title">Booking Details</h1>
+                <div class="booking-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        Booked on: {{ booking.booking_date.strftime('%d-%m-%Y') if booking.booking_date else 'N/A' }}
+                    </span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="action-buttons">
+                    {% if booking.status == 'confirmed' %}
+                        <a href="{{ url_for('check_in', id=booking.id) }}" class="btn-action btn-checkin">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Check In</span>
+                        </a>
+                        <a href="{{ url_for('cancel_booking', id=booking.id) }}" class="btn-action btn-cancel" onclick="return confirm('Cancel this booking?')">
+                            <i class="fas fa-times"></i>
+                            <span>Cancel</span>
+                        </a>
+                    {% elif booking.status == 'checked-in' %}
+                        <a href="{{ url_for('check_out', id=booking.id) }}" class="btn-action btn-checkout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Check Out</span>
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('bookings') }}" class="btn-action btn-back">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="status-bar">
+            <div class="status-indicator status-{{ booking.status }}">
+                <i class="fas fa-{% if booking.status == 'confirmed' %}check-circle{% elif booking.status == 'checked-in' %}door-open{% elif booking.status == 'checked-out' %}check-double{% else %}exclamation-circle{% endif %}"></i>
+                <span>Current Status: {{ booking.status|upper }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="detail-grid">
+        <!-- Guest Information Card -->
+        <div class="info-card guest-card">
+            <div class="card-header-gold">
+                <i class="fas fa-user"></i>
+                <h3>Guest Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="guest-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="guest-details">
+                    <h4 class="guest-name">{{ booking.guest.first_name }} {{ booking.guest.last_name }}</h4>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email:</span>
+                        </div>
+                        <div class="detail-value">
+                            <a href="mailto:{{ booking.guest.email }}" class="email-link">{{ booking.guest.email }}</a>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fas fa-phone"></i>
+                            <span>Phone:</span>
+                        </div>
+                        <div class="detail-value">
+                            <a href="tel:{{ booking.guest.phone }}" class="phone-link">{{ booking.guest.phone }}</a>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Address:</span>
+                        </div>
+                        <div class="detail-value address-text">{{ booking.guest.address or 'N/A' }}</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fas fa-id-card"></i>
+                            <span>ID Proof:</span>
+                        </div>
+                        <div class="detail-value">
+                            {% if booking.guest.proof_type and booking.guest.id_proof %}
+                                <span class="proof-badge">{{ booking.guest.proof_type }}</span>
+                                <span class="proof-number">{{ booking.guest.id_proof }}</span>
+                            {% else %}
+                                <span class="na-badge">Not provided</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Room Information Card -->
+        <div class="info-card room-card">
+            <div class="card-header-gold">
+                <i class="fas fa-door-open"></i>
+                <h3>Room Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="room-display">
+                    <div class="room-number">{{ booking.room.room_number }}</div>
+                    <div class="room-type-badge">{{ booking.room.room_type }}</div>
+                </div>
+                
+                <div class="room-details">
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fas fa-tag"></i>
+                            <span>Price per Night:</span>
+                        </div>
+                        <div class="detail-value price">${{ booking.room.price }}</div>
+                    </div>
+                    
+                    <div class="detail-row description-row">
+                        <div class="detail-label description-label">
+                            <i class="fas fa-align-left"></i>
+                            <span>Description:</span>
+                        </div>
+                        <div class="detail-value description-value">
+                            {% if booking.room.description %}
+                                <div class="description-content">{{ booking.room.description }}</div>
+                            {% else %}
+                                <div class="empty-description">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>No description available for this room</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Summary Card -->
+        <div class="info-card summary-card">
+            <div class="card-header-gold">
+                <i class="fas fa-calendar-check"></i>
+                <h3>Booking Summary</h3>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <span class="timeline-label">Check-in</span>
+                            <span class="timeline-value date-value">{{ booking.check_in_date.strftime('%d %B, %Y') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="fas fa-calendar-week"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <span class="timeline-label">Check-out</span>
+                            <span class="timeline-value date-value">{{ booking.check_out_date.strftime('%d %B, %Y') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item highlight">
+                        <div class="timeline-icon">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <span class="timeline-label">Total Nights</span>
+                            <span class="timeline-value nights">{{ booking.nights() }} Nights</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-summary">
+                    <h4 class="payment-title">Payment Details</h4>
+                    
+                    <div class="payment-row">
+                        <span class="payment-label">Room Charges ({{ booking.nights() }} nights × ${{ booking.room.price }})</span>
+                        <span class="payment-amount">${{ booking.total_amount }}</span>
+                    </div>
+                    
+                    <div class="payment-row paid">
+                        <span class="payment-label">Paid Amount</span>
+                        <span class="paid-amount">${{ booking.paid_amount }}</span>
+                    </div>
+                    
+                    <div class="payment-row balance">
+                        <span class="payment-label">Balance Due</span>
+                        <span class="balance-amount {% if booking.balance() > 0 %}due{% else %}clear{% endif %}">
+                            ${{ booking.balance() }}
+                        </span>
+                    </div>
+                    
+                    <div class="payment-status">
+                        {% if booking.balance() == 0 %}
+                            <span class="status-badge paid-full">
+                                <i class="fas fa-check-circle"></i> Fully Paid
+                            </span>
+                        {% elif booking.paid_amount > 0 %}
+                            <span class="status-badge partial">
+                                <i class="fas fa-exclamation-circle"></i> Partial Payment
+                            </span>
+                        {% else %}
+                            <span class="status-badge unpaid">
+                                <i class="fas fa-times-circle"></i> No Payment
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoices Section -->
+    {% if booking.invoices %}
+    <div class="invoices-section">
+        <div class="section-header-gold">
+            <i class="fas fa-file-invoice"></i>
+            <h3>Invoices</h3>
+        </div>
+        
+        <div class="invoices-grid">
+            {% for inv in booking.invoices %}
+            <div class="invoice-card">
+                <div class="invoice-header">
+                    <span class="invoice-id">Invoice #{{ inv.id }}</span>
+                    <span class="invoice-date">{{ inv.invoice_date.strftime('%d-%m-%Y') }}</span>
+                </div>
+                <div class="invoice-body">
+                    <div class="invoice-amount">${{ inv.amount }}</div>
+                    <div class="invoice-status">
+                        {% if inv.paid %}
+                            <span class="status-paid"><i class="fas fa-check-circle"></i> Paid</span>
+                        {% else %}
+                            <span class="status-unpaid"><i class="fas fa-clock"></i> Unpaid</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="invoice-footer">
+                    <a href="{{ url_for('view_invoice', id=inv.id) }}" class="btn-view-invoice">
+                        <i class="fas fa-eye"></i> View Invoice
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h4 class="quick-actions-title">Quick Actions</h4>
+        <div class="action-grid">
+            <a href="#" class="quick-action-card" onclick="window.print()">
+                <i class="fas fa-print"></i>
+                <span>Print Details</span>
+            </a>
+            <a href="mailto:{{ booking.guest.email }}" class="quick-action-card">
+                <i class="fas fa-envelope"></i>
+                <span>Email Guest</span>
+            </a>
+            {% if booking.status == 'confirmed' %}
+            <a href="{{ url_for('check_in', id=booking.id) }}" class="quick-action-card checkin">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Check In</span>
+            </a>
+            {% elif booking.status == 'checked-in' %}
+            <a href="{{ url_for('check_out', id=booking.id) }}" class="quick-action-card checkout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Check Out</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.booking-detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* ===== HEADER SECTION ===== */
+.detail-header {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.booking-badge {
+    margin-bottom: 1rem;
+}
+
+.badge-gold {
+    background: rgba(198, 164, 63, 0.2);
+    color: var(--gold-light);
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid rgba(198, 164, 63, 0.3);
+}
+
+.booking-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-family: 'Playfair Display', serif;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.booking-meta {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.95rem;
+}
+
+.meta-item i {
+    color: var(--gold);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-checkin {
+    background: linear-gradient(135deg, #0B5E42, #1E8F6B);
+    color: white;
+}
+
+.btn-checkout {
+    background: linear-gradient(135deg, #B76E2E, #E5C87B);
+    color: white;
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #9B2C2C, #C13B3B);
+    color: white;
+}
+
+.btn-back {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    backdrop-filter: blur(5px);
+}
+
+.btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.status-bar {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.status-indicator.confirmed {
+    background: rgba(198, 164, 63, 0.2);
+    color: var(--gold-light);
+}
+
+.status-indicator.checked-in {
+    background: rgba(11, 94, 66, 0.2);
+    color: #4cc9f0;
+}
+
+.status-indicator.checked-out {
+    background: rgba(108, 117, 125, 0.2);
+    color: #adb5bd;
+}
+
+.status-indicator.cancelled {
+    background: rgba(155, 44, 44, 0.2);
+    color: #f72585;
+}
+
+/* ===== DETAIL GRID ===== */
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1200px) {
+    .detail-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== INFO CARDS ===== */
+.info-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(198, 164, 63, 0.15);
+}
+
+.card-header-gold {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: white;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.card-header-gold i {
+    font-size: 1.3rem;
+    color: var(--gold);
+}
+
+.card-header-gold h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.3px;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Guest Card */
+.guest-card .guest-avatar {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.guest-card .guest-avatar i {
+    font-size: 4rem;
+    color: var(--gold);
+    opacity: 0.5;
+}
+
+.guest-name {
+    text-align: center;
+    color: var(--navy);
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--gold-light);
+    padding-bottom: 0.5rem;
+}
+
+/* Room Card */
+.room-display {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    border-radius: 15px;
+    color: white;
+}
+
+.room-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+    line-height: 1.2;
+    color: white;
+}
+
+.room-type-badge {
+    display: inline-block;
+    padding: 0.3rem 1rem;
+    background: rgba(198, 164, 63, 0.2);
+    color: var(--gold-light);
+    border-radius: 50px;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+/* Detail Rows - Improved Colors */
+.detail-row {
+    display: flex;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    width: 100px;
+    color: #5a6a7a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.detail-label i {
+    color: var(--gold);
+    width: 16px;
+}
+
+.detail-value {
+    flex: 1;
+    color: #1e2a3a;
+    font-weight: 500;
+}
+
+.detail-value a {
+    color: #2c5f8a;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.detail-value a:hover {
+    color: var(--gold);
+    text-decoration: underline;
+}
+
+.detail-value.price {
+    color: var(--gold-dark);
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.address-text, .description-content {
+    color: #2d3e4f;
+    line-height: 1.5;
+}
+
+/* ===== IMPROVED DESCRIPTION STYLING ===== */
+/* Fix description alignment */
+.description-row{
+    align-items:flex-start;
+}
+
+.description-label{
+    width:130px;
+    min-width:130px;
+    padding-top:6px;
+}
+
+.description-value{
+    flex:1;
+}
+
+/* Empty description state */
+.empty-description{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 14px;
+    background:#f8f9fb;
+    border:1px dashed #cfd6dd;
+    border-radius:10px;
+    color:#6c757d;
+    font-style:italic;
+    width:100%;
+}
+
+.empty-description i{
+    color:var(--gold);
+    font-size:14px;
+    opacity:0.7;
+}
+
+.empty-description i {
+    color: var(--gold);
+    opacity: 0.6;
+    font-size: 0.9rem;
+}
+
+.empty-description span {
+    font-size: 0.9rem;
+}
+
+.proof-badge {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy);
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.3rem;
+}
+
+.proof-number {
+    font-family: monospace;
+    background: #f0f2f5;
+    color: #1e2a3a;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+}
+
+.na-badge {
+    display: inline-block;
+    padding: 0.2rem 0.8rem;
+    background: #f1f3f5;
+    color: #6c757d;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* Timeline */
+.timeline {
+    margin-bottom: 1.5rem;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.timeline-item:last-child {
+    border-bottom: none;
+}
+
+.timeline-item.highlight {
+    background: rgba(198, 164, 63, 0.05);
+    margin: 0 -1.5rem;
+    padding: 1rem 1.5rem;
+}
+
+.timeline-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(198, 164, 63, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+}
+
+.timeline-content {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.timeline-label {
+    color: #5a6a7a;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.timeline-value {
+    color: #1e2a3a;
+    font-weight: 600;
+}
+
+.timeline-value.date-value {
+    color: #2c5f8a;
+}
+
+.timeline-value.nights {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy);
+    padding: 0.2rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+}
+
+/* Payment Summary */
+.payment-summary {
+    background: #f8fafc;
+    padding: 1.2rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+}
+
+.payment-title {
+    color: #1e2a3a;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    border-left: 3px solid var(--gold);
+    padding-left: 0.5rem;
+}
+
+.payment-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    color: #4a5a6a;
+}
+
+.payment-label {
+    color: #4a5a6a;
+}
+
+.payment-amount {
+    color: #1e2a3a;
+    font-weight: 500;
+}
+
+.payment-row.paid {
+    border-top: 1px dashed #dee2e6;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    font-weight: 600;
+}
+
+.paid-amount {
+    color: #0B5E42;
+    font-weight: 700;
+}
+
+.payment-row.balance {
+    border-top: 2px solid #dee2e6;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.balance-amount.due {
+    color: #9B2C2C;
+    font-weight: 700;
+}
+
+.balance-amount.clear {
+    color: #0B5E42;
+    font-weight: 700;
+}
+
+.payment-status {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-badge.paid-full {
+    background: rgba(11, 94, 66, 0.1);
+    color: #0B5E42;
+}
+
+.status-badge.partial {
+    background: rgba(183, 110, 46, 0.1);
+    color: #B76E2E;
+}
+
+.status-badge.unpaid {
+    background: rgba(155, 44, 44, 0.1);
+    color: #9B2C2C;
+}
+
+/* ===== INVOICES SECTION ===== */
+.invoices-section {
+    margin: 2rem 0;
+}
+
+.section-header-gold {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-header-gold i {
+    font-size: 1.5rem;
+    color: var(--gold);
+}
+
+.section-header-gold h3 {
+    color: var(--navy);
+    font-size: 1.3rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.invoices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.invoice-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.invoice-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(198, 164, 63, 0.15);
+}
+
+.invoice-header {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: white;
+    padding: 1rem 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.invoice-id {
+    font-weight: 600;
+    font-size: 1rem;
+    color: white;
+}
+
+.invoice-date {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    color: rgba(255,255,255,0.9);
+}
+
+.invoice-body {
+    padding: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.invoice-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy);
+    font-family: 'Playfair Display', serif;
+}
+
+.status-paid {
+    color: #0B5E42;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+}
+
+.status-unpaid {
+    color: #9B2C2C;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+}
+
+.invoice-footer {
+    padding: 1rem 1.2rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-view-invoice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-view-invoice:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(198, 164, 63, 0.3);
+}
+
+/* ===== QUICK ACTIONS ===== */
+.quick-actions {
+    margin-top: 2rem;
+}
+
+.quick-actions-title {
+    color: var(--navy);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.quick-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.2rem;
+    background: white;
+    border-radius: 15px;
+    text-decoration: none;
+    color: var(--navy);
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--gold);
+    box-shadow: 0 10px 20px rgba(198, 164, 63, 0.1);
+}
+
+.quick-action-card i {
+    font-size: 1.5rem;
+    color: var(--gold);
+}
+
+.quick-action-card.checkin i {
+    color: #0B5E42;
+}
+
+.quick-action-card.checkout i {
+    color: #B76E2E;
+}
+
+.quick-action-card span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #2d3e4f;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .detail-header {
+        padding: 1.5rem;
+    }
+    
+    .booking-title {
+        font-size: 1.8rem;
+    }
+    
+    .action-buttons {
+        width: 100%;
+    }
+    
+    .btn-action {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+    
+    .detail-label {
+        width: 100%;
+    }
+    
+    .timeline-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .booking-title {
+        font-size: 1.5rem;
+    }
+    
+    .booking-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-action {
+        width: 100%;
+    }
+    
+    .invoices-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .btn-action, .quick-actions, .footer, .navbar {
+        display: none !important;
+    }
+    
+    .detail-header {
+        background: white;
+        color: black;
+        box-shadow: none;
+    }
+    
+    .info-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+}
+</style>
+{% endblock %}
