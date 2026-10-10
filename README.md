@@ -9,12 +9,9 @@ A full-featured Hotel Management System built with **Python Flask and SQLite** t
 
 ---
 
-## 📌 Project Type
-
-- Major Academic Project (BCA – 6th Semester)
-- Freelance-ready Hotel Management System
-
----
+> 🤝 **Project Type: Freelance**
+>
+> This project was built as part of a freelance engagement for a client. It is shared here with the client's permission to showcase my work, and sensitive details such as credentials, business data, and proprietary information have been removed. If you'd like a similar solution for your business, feel free to get in touch!
 
 ## ✨ Features
 
